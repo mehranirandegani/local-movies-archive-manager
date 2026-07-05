@@ -59,6 +59,7 @@ public class App extends Application {
     private MovieDetailPane detailPane; // needs `config`, so built in start() rather than as a field initializer
     private final ProgressBar progressBar = new ProgressBar(0);
     private final Label statusLabel = new Label("");
+    private final Label resultCountLabel = new Label();
     private final TextField searchField = new TextField();
     private final Button clearSearchBtn = new Button("×");
     private final ComboBox<String> viewModeBox = new ComboBox<>();
@@ -116,7 +117,7 @@ public class App extends Application {
         BorderPane root = new BorderPane();
         root.setTop(buildToolbar(stage));
         root.setLeft(buildFiltersPanel());
-        root.setCenter(buildCenter());
+        root.setCenter(buildCenterWithCount());
         root.setRight(detailPane);
 
         detailPane.setOnFixMatchRequested(this::openReviewDialog);
@@ -533,6 +534,17 @@ public class App extends Application {
         tagList.setItems(FXCollections.observableArrayList(filtered));
     }
 
+    private VBox buildCenterWithCount() {
+        resultCountLabel.getStyleClass().add("result-count");
+        HBox countRow = new HBox(resultCountLabel);
+        countRow.setPadding(new Insets(8, 16, 4, 16));
+
+        StackPane center = buildCenter();
+        VBox.setVgrow(center, Priority.ALWAYS);
+
+        return new VBox(countRow, center);
+    }
+
     private StackPane buildCenter() {
         gridListView.getStyleClass().add("virtual-grid");
         gridListView.setCellFactory(lv -> new GridRowCell());
@@ -793,14 +805,17 @@ public class App extends Application {
     private void applyFilters() {
         String q = searchField.getText() == null ? "" : searchField.getText().toLowerCase(Locale.ROOT);
         List<Movie> filtered = allMovies.stream()
-                .filter(m -> selectedTags.isEmpty() || m.getTags().containsAll(selectedTags))
-                .filter(m -> selectedGenres.isEmpty() || m.getTags().containsAll(selectedGenres))
+                .filter(m -> selectedTags.isEmpty() || selectedTags.stream().anyMatch(m.getTags()::contains))
+                .filter(m -> selectedGenres.isEmpty() || selectedGenres.stream().anyMatch(m.getTags()::contains))
                 .filter(m -> !favoriteFilterBtn.isSelected() || m.isFavorite())
                 .filter(m -> !watchedFilterBtn.isSelected() || m.isWatched())
                 .filter(advancedFilter::matches)
                 .filter(m -> q.isBlank() || matches(m, q))
                 .sorted(comparatorFor(sortBox.getValue()))
                 .toList();
+        resultCountLabel.setText(filtered.size() == allMovies.size()
+                ? Strings.movieCountAll(allMovies.size())
+                : Strings.movieCountFiltered(filtered.size(), allMovies.size()));
         renderGrid(filtered);
     }
 

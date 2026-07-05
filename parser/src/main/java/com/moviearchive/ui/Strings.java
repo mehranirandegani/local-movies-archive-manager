@@ -195,4 +195,6 @@ public final class Strings {
     public static String saveError(String msg) { return t("خطا در ذخیره: " + msg, "Save error: " + msg); }
     public static String openReviewQueueError(String msg) { return t("خطا در باز کردن صف بازبینی: " + msg, "Error opening review queue: " + msg); }
     public static String restartFailed(String msg) { return t("راه‌اندازی مجدد ناموفق بود: " + msg, "Restart failed: " + msg); }
+    public static String movieCountAll(int total) { return t(total + " فیلم", total + " movies"); }
+    public static String movieCountFiltered(int shown, int total) { return t(shown + " از " + total + " فیلم", shown + " of " + total + " movies"); }
 }

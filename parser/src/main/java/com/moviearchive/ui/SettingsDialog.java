@@ -59,7 +59,7 @@ public class SettingsDialog {
         tabs.getStyleClass().add("settings-tabs");
         tabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
-        Tab generalTab = new Tab(Strings.tabGeneral(), scrollable(buildGeneralTab(config, onRestartRequested)));
+        Tab generalTab = new Tab(Strings.tabGeneral(), scrollable(buildGeneralTab(stage, config, onRestartRequested)));
         Tab connectionTab = new Tab(Strings.tabConnection(), scrollable(buildConnectionTab(config, onTmdbConfigChanged)));
         Tab foldersTab = new Tab(Strings.tabFolders(), scrollable(buildFoldersTab(owner, repository, tmdbClientSupplier, posterCacheSupplier, onDataChanged)));
         Tab archiveTab = new Tab(Strings.tabArchive(), scrollable(buildArchiveTab(stage, owner, config, repository, tmdbClientSupplier, posterCacheSupplier,
@@ -86,7 +86,7 @@ public class SettingsDialog {
     // ============================================================
     // Tab: General (language)
     // ============================================================
-    private static VBox buildGeneralTab(AppConfig config, Runnable onRestartRequested) {
+    private static VBox buildGeneralTab(Stage dialogStage, AppConfig config, Runnable onRestartRequested) {
         Label info = new Label(Strings.languageInfo());
         info.setWrapText(true);
 
@@ -106,7 +106,7 @@ public class SettingsDialog {
             config.setAppLanguage(chosen);
             config.save();
             if (changed) {
-                savedLabel.setText(Strings.restartingNotice());
+                dialogStage.close();
                 onRestartRequested.run();
             } else {
                 savedLabel.setText(Strings.saved());

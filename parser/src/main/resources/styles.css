@@ -126,6 +126,11 @@
     -fx-text-fill: white;
 }
 
+.result-count {
+    -fx-text-fill: #8a8a9a;
+    -fx-font-size: 12px;
+}
+
 /* ============ Poster grid / cards ============ */
 
 .scroll-pane, .scroll-pane > .viewport {
