@@ -10,8 +10,8 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
@@ -54,7 +54,7 @@ public class MovieDetailPane extends ScrollPane {
     private final Label countryLabel = new Label();
     private final FlowPane directorPane = new FlowPane();
     private final Label overviewLabel = new Label();
-    private final FlowPane castPane = new FlowPane();
+    private final VBox castPane = new VBox(4);
     private final FlowPane tagsPane = new FlowPane();
     private final Button playButton = new Button(Strings.playMovie());
     private final Button trailerButton = new Button(Strings.trailerOrImdb());
@@ -98,11 +98,8 @@ public class MovieDetailPane extends ScrollPane {
         directorPane.setVgap(2);
 
         overviewLabel.setWrapText(true);
-        overviewLabel.setTextAlignment(TextAlignment.RIGHT);
+        overviewLabel.setTextAlignment(TextAlignment.LEFT);
         overviewLabel.setMaxWidth(Double.MAX_VALUE);
-
-        castPane.setHgap(4);
-        castPane.setVgap(4);
 
         tagsPane.setHgap(6);
         tagsPane.setVgap(6);
@@ -158,7 +155,7 @@ public class MovieDetailPane extends ScrollPane {
 
         overviewLabel.setPrefWidth(narrowWidth);
         directorPane.setPrefWrapLength(narrowWidth);
-        castPane.setPrefWrapLength(narrowWidth);
+        castPane.setMaxWidth(narrowWidth);
         tagsPane.setPrefWrapLength(narrowWidth);
     }
 
@@ -247,7 +244,9 @@ public class MovieDetailPane extends ScrollPane {
             for (String display : movie.getCast()) {
                 String plainName = stripCharacterSuffix(display);
                 Hyperlink link = makePersonLink(plainName);
-                link.setText(display); // show "Name (Character)" but search by plain name
+                link.setText(truncateForDisplay(display)); // show "Name (Character)" but search by plain name
+                link.setMaxWidth(280);
+                Tooltip.install(link, new Tooltip(display));
                 castPane.getChildren().add(link);
             }
         }
@@ -312,6 +311,14 @@ public class MovieDetailPane extends ScrollPane {
     private String stripCharacterSuffix(String display) {
         int idx = display.indexOf(" (");
         return idx > 0 ? display.substring(0, idx).trim() : display.trim();
+    }
+
+    private static final int MAX_CAST_DISPLAY_LENGTH = 45;
+
+    /** Trims very long cast entries (e.g. a long character description) so one entry can't force horizontal overflow. Full text is still shown as a tooltip. */
+    private String truncateForDisplay(String text) {
+        if (text == null || text.length() <= MAX_CAST_DISPLAY_LENGTH) return text;
+        return text.substring(0, MAX_CAST_DISPLAY_LENGTH - 1).trim() + "…";
     }
 
     private Hyperlink makePersonLink(String plainName) {
