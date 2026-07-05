@@ -57,7 +57,9 @@ public class ScanPipeline extends Task<ScanPipeline.Summary> {
         for (Path root : roots) {
             if (isCancelled()) break;
             updateMessage("در حال پیمایش: " + root);
-            List<ArchiveScanner.MovieUnit> units = new ArchiveScanner().scan(root);
+            ArchiveScanner scanner = new ArchiveScanner();
+            scanner.setOnWarning(this::updateMessage);
+            List<ArchiveScanner.MovieUnit> units = scanner.scan(root);
 
             for (ArchiveScanner.MovieUnit unit : units) {
                 totalFound++;
